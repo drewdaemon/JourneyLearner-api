@@ -1,0 +1,17 @@
+{
+  "name": "journeylearner-api",
+  "version": "1.0.0",
+  "description": "The back of an app that teaches the journey behind a story",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrew Tate",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.4",
+    "mongodb": "^2.1.18"
+  },
+  "devDependencies": {}
+}
