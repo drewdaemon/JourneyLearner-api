@@ -1,7 +1,42 @@
 var express = require('express');
-var MongoClient = require('mongodb').MongoClient;
+var mongoose = require('mongoose');
 var port = 2000;
 var app = express();
+
+var mapSchema = mongoose.Schema({
+  id: Number,
+  title: String,
+  description: String,
+  author: String,
+  image: String,
+  dimensions: [Number],
+  points: [{ x: Number, y: Number }],
+  datapoints: [{}],
+  created: { type: Date, default: Date.now }
+});
+
+var Map = mongoose.model('Map', mapSchema);
+
+// var map = new Map({
+//   id: 2,
+//   title: 'Marco Polo\'s Journey to the East',
+//   description: 'He went!',
+//   author: 'Andrew Tate',
+//   image: 'marco.png',
+//   dimensions: [700, 400],
+//   points: [
+//     { x: 50, y: 29 },
+//     { x: 100, y: 50 },
+//     { x: 120, y: 80 },
+//     { x: 300, y: 100 },
+//     { x: 330, y: 130 },
+//     { x: 330, y: 150 },
+//     { x: 330, y: 180 },
+//   ],
+//   datapoints: [{}]
+// });
+
+mongoose.connect('mongodb://localhost:27017/journeylearner');
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -10,17 +45,18 @@ app.use(function(req, res, next) {
 });
 
 app.get('/maps', function (req, res) {
-  MongoClient.connect('mongodb://localhost:27017/journeylearner', function(err, db) {
-    if (err) {
-      throw err;
-    }
-    db.collection('maps').find().toArray(function(err, result) {
-      if (err) {
-        throw err;
-      }
-      console.log('Get request to maps API: /maps');
-      res.send(result);
-    });
+  Map.find(function (err, maps) {
+    if (err) return handleError(err);
+    console.log('Get request to maps API: /maps');
+    res.send(maps);
+  });
+});
+
+app.post('/maps', function (req, res) {
+  var map = new Map(req.data);
+  map.save(function (err) {
+    if (err) return handleError(err);
+    console.log('Saved ' + map.title + ' by ' + map.author);
   });
 });
 
