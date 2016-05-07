@@ -1,6 +1,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
-var port = 2000;
+// process.env.PORT lets the port be set by Heroku
+var port = process.env.PORT || 8080;
 var app = express();
 
 var mapSchema = mongoose.Schema({
@@ -36,7 +37,9 @@ var Map = mongoose.model('Map', mapSchema);
 //   datapoints: [{}]
 // });
 
-mongoose.connect('mongodb://localhost:27017/journeylearner');
+// map.save();
+
+mongoose.connect(process.env.MONGODB_URI);
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
