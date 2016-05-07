@@ -9,6 +9,9 @@
   },
   "author": "Andrew Tate",
   "license": "ISC",
+  "engines": {
+    "node": "5.2.0"
+  },
   "dependencies": {
     "express": "^4.13.4",
     "mongodb": "^2.1.18",
