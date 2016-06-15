@@ -1,9 +1,13 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var aws = require('aws-sdk');
+var bodyParser = require('body-parser')
+
 // process.env.PORT lets the port be set by Heroku
 var port = process.env.PORT || 8080;
 var app = express();
+
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
 
 var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
@@ -15,34 +19,13 @@ var mapSchema = mongoose.Schema({
   description: String,
   author: String,
   image: String,
-  dimensions: [Number],
   points: [{ x: Number, y: Number }],
-  datapoints: [{}],
+  datapoints: [{ coords: [Number], desc: String }],
+  dimensions: [Number],
   created: { type: Date, default: Date.now }
 });
 
 var Map = mongoose.model('Map', mapSchema);
-
-// var map = new Map({
-//   id: 2,
-//   title: 'Marco Polo\'s Journey to the East',
-//   description: 'He went!',
-//   author: 'Andrew Tate',
-//   image: 'marco.png',
-//   dimensions: [700, 400],
-//   points: [
-//     { x: 50, y: 29 },
-//     { x: 100, y: 50 },
-//     { x: 120, y: 80 },
-//     { x: 300, y: 100 },
-//     { x: 330, y: 130 },
-//     { x: 330, y: 150 },
-//     { x: 330, y: 180 },
-//   ],
-//   datapoints: [{}]
-// });
-
-// map.save();
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -54,18 +37,28 @@ app.use(function(req, res, next) {
 
 app.get('/maps', function (req, res) {
   Map.find(function (err, maps) {
-    if (err) return handleError(err);
+    if (err) console.log('Error: ' + err);
     console.log('Get request to maps API: /maps');
     res.send(maps);
   });
 });
 
-
 app.post('/maps', function (req, res) {
-  var map = new Map(req.data);
-  map.save(function (err) {
-    if (err) return handleError(err);
-    console.log('Saved ' + map.title + ' by ' + map.author);
+  var map = new Map(req.body);
+
+  console.log('---------------------------------\n');
+  Map.find().count().then(function (count) {
+    map.id = count;
+    console.log(map);
+    map.save(function (err) {
+      if (err) {
+        console.log('Error: ' + err);
+        res.send('Save Failed');
+      } else {
+        console.log('Saved ' + map.title + ' by ' + map.author);
+        res.send(map);
+      }
+    });
   });
 });
 
